@@ -1,0 +1,880 @@
+Event-based evaluation of abstractive news summarization
+Huiling You¹, Samia Touileb², Erik Velldal¹, and Lilja Øvrelid¹
+¹University of Oslo
+²University of Bergen
+{huiliny, erikve, liljao}@ifi.uio.nc
+samia.touileb@uib.no
+Abstract
+mantic triplet units as a judgment of the seman-
+tic content units in generated texts, and Liu et al.
+An abstractive summary of a news article
+(2023) also propose a similar protocol based on
+contains its most important information in
+semantic units, named Atomic Content Units. In-
+a condensed version. The evaluation of au-
+tomatically generated summaries by genera-
+spired by event extraction (EE), a NLP task that
+tive language models relies heavily on human-
+extracts event information from unstructured texts
+authored summaries as gold references, by cal-
+into structured forms (Doddington et al., 2004),
+culating overlapping units or similarity scores.
+we propose to analyze the quality of news ar-
+arXiv:2507.01160v1 [cs.CL] 2025
+News articles report events, and ideally so
+ticle summaries by comparing the overlapping
+should the summaries. In this work, we propose
+events between generated summaries, reference
+to evaluate the quality of abstractive summaries
+summaries, and the source articles. By using struc-
+by calculating overlapping events between gen-
+erated summaries, reference summaries, and
+tured event information, we provide more insight
+the original news articles. We experiment on
+into both the generated summaries and human-
+a richly annotated Norwegian dataset compris-
+authored summaries. We experiment on a Norwe-
+ing both events annotations and summaries au-
+gian dataset with rich annotations both for events
+thored by expert human annotators. Our ap-
+(EDEN (Touileb et al., 2024)), and summaries (Nor-
+proach provides more insight into the event
+Summ (Touileb et al., 2025)), and demonstrate the
+information contained in the summaries.
+usefulness of the proposed event-based evaluation
+1 Introduction
+metric which is grounded in the overlap of identi-
+fied events.
+A summary of a news article provides a condensed
+version of its main content (El-Kassas et al., 2021).
+2 Event-overlap
+One of the primary practical applications of large
+language models (LLMs) is generating concise text
+Our proposed metric calculates the degree of over-
+summaries, and many news publishers in Norway
+lapping events between summaries (generated and
+have already integrated LLM-generated summaries
+human-authored) and the source texts. First, an
+into their articles. However, assessing the quality
+event extraction system is used to extract events
+and accuracy of these summaries remains a chal-
+from summaries and source articles. Second,
+lenge. Current evaluation metrics compare gen-
+standard event extraction evaluation metrics are
+erated summaries to ideal summaries created by
+adapted and applied to calculate the actual event
+humans, in terms of overlapping words/units, such
+overlaps.
+as ROUGE-L (Lin, 2004), or semantic similarity,
+2.1 Event extraction
+such as BERTScore (Zhang* et al., 2020). How-
+ever, these metrics provide limited information on
+An event (Doddington et al., 2004) contains four
+the semantic content of the summaries themselves.
+key elements: 1) event type is the specific type of
+With the increasing usage of LLMs for text gen-
+event defined within an ontology; 2) event trigger
+eration, there has been a growing number of stud-
+is the word(s) in the text that describes the event;
+ies on evaluating the factuality of these texts from
+3) event argument is the attribute and actual par-
+the perspective of contained information, such as
+ticipant of an event in the text; 4) argument role
+FACTSCORE (Min et al., 2023). For summariza-
+is the role played by an argument in the specific
+tion, Zhang and Bansal (2021) propose to use se-
+event. Figure 1 shows an example of a Norwegian
+ARREST-JAIL
+in both lists of extracted events.
+VICTIM
+An argument role (Role-C) overlaps if the
+event type and argument role overlap.
+Over 450 mennesker
+ble
+arrestert
+An argument (Arg-C) overlaps if the event
+Over 450 people
+were
+arrested
+type, argument role, and argument word(s)
+overlap.
+Figure 1: Example of a sentence with event annotation.
+The ARREST-JAIL event has the trigger "arrested", and
+The Precision (P), Recall (R), and F1 scores
+the VICTIM argument is "Over 450 people".
+of each category are calculated. The final event-
+overlap score is an aggregated score of the
+three categories of scores: Event-overlap =
+sentence annotated for an ARREST-JAIL event with
+ge([eType-C, Role-C, Arg-C]). Depending
+"arrested" as the event trigger, and a VICTIM argu-
+on the event overlap of different texts, different
+ment "Over 450 people". We use an existing event
+scores are used:
+extraction system NorEventGen (You et al., 2025)
+to obtain event information in these structured for-
+Event-overlap between summaries: the fi-
+mats.
+nal event-overlap score is the average Recall
+We perform event extraction on three different
+scores of eType-C, Role-C, and Arg-C. Recall
+texts: 1) model-generated summaries; 2) human-
+scores prioritize the events that are in the gold
+authored summaries; and 3) original news articles.
+summaries.
+Event-overlap between summaries and
+2.2 Event-overlap analysis
+original articles: the final event-overlap score
+Our event-overlap metric is adapted from the classi-
+is the average Precision scores of eType-C,
+cal evaluation metrics of event extraction (Lin et al.,
+Role-C, and Arg-C. Precision scores provide
+2020; Nguyen et al., 2021), as follows: an event
+evaluation of identified events in the sum-
+trigger is correctly identified (Trg-I) if its offsets
+maries that are also present in the original
+match a reference trigger, and correctly classified
+articles.
+(Trg-C) if its event type also matches a reference
+3 Experimental setup
+trigger; An argument is correctly identified (Arg-I)
+if its offsets match a reference argument, and cor-
+Datasets We use two recently released datasets:
+rectly classified (Arg-C) if its argument role also
+the Norwegian event detection dataset EDEN
+matches the reference argument.
+(Touileb et al., 2024) and the human-authored sum-
+Since an abstractive summary does not perform
+maries of Norwegian news articles dataset Nor-
+text extraction from the source article, we do not
+Summ (Touileb et al., 2025). The source articles
+expect a perfect match between an event trigger /
+of NorSumm are a subset of EDEN. These paral-
+argument from the summary and one from the arti-
+lel annotations of events and summaries make it
+cle. As an alternative, we use BERTScore (Zhang*
+possible to evaluate our approach and contrast gold
+et al., 2020) as a reference to check if two pieces
+vs predicted event information on gold vs gener-
+of texts are similar. 1 Unlike in event extraction,
+ated summaries. More concretely, we use the test
+we prioritize the labels, namely event type and ar-
+set of NorSumm, which contains 33 news articles,
+gument role. We do not take trigger word(s) into
+each coupled with three unique human-authored
+account, because the event type information itself
+summaries.
+is sufficient, and unlike event arguments, which
+LLMs For automatic summarization, we
+are named entities, trigger words are more often
+rephrased with a different choice of words in sum-
+evaluate a range of Norwegian and Nordic
+maries. With the corresponding adaptation, our
+open-source pretrained and instruction-finetuned
+decoder-only
+LLMs:
+Llama-3-8B-instruct,²
+proposed event-overlap metric calculates the fol-
+Llama-3-8B,³ Meta-Llama-3-8B-Instruct⁴, Mistral-
+lowing three categories of scores:
+²https://huggingface.co/AI-Sweden-Models/
+An event type (eType-C) overlaps if it exists
+Llama-3-8B-instruct
+3https://huggingface.co/AI-Sweden-Models/
+¹We use a heuristic threshold of 0.7. If the BERTScore is
+Llama-3-8B
+larger than 0.7, two text snippets will be considered similar,
+hhttps://huggingface.co/meta-llama/
+the same as perfect match in event extraction metric.
+Meta-Llama-3-8B-Instruct
+Nemo-Instruct-2407,5 Normistral-11b-warm⁶, and
+of detail in the summaries compared to the news
+Normistral-7b-warm-instruct. All the LLMs are
+articles. Similarly, the event-overlap metric shows
+available via HuggingFace.⁸ We use the same
+that Normistral-11b-warm is the best-performing
+prompts as in the NorSumm evaluation (Touileb
+model, but the summaries generated by Llama-3-
+et al., 2025) to generate summaries, and keep only
+8B and Normistral-7b-warm-instruct also produce
+one summary that has highest average score of
+relatively good results with each of the fine-grained
+ROUGE-L and BERTScore values for each model.
+metrics.
+Table 3 provides detailed event statistics of
+Event extraction system We use a generative
+both human-authored and generated summaries,
+event extraction system NorEventGen (You et al.,
+together with event information of the original arti-
+2025) to identify and extract events from both the
+cles. In general, there are always fewer events in
+original articles and the summaries. NorEventGen
+the summaries as compared to in the original arti-
+is trained on EDEN, and holds the current SOTA
+cles, which is expected. Human annotators have
+results. The system performs sentence-level extrac-
+rather high agreement on event numbers, but the
+tion. In our experiments, both the original articles
+number of argument roles vary quite a lot, mean-
+and the summaries are first split into sentences, and
+ing they tend to describe the events with varied
+then event prediction is performed on each of the
+details when writing the summaries. For model-
+sentences.
+generated summaries, some describe considerably
+4 Results and discussion
+more events than others; the summaries generated
+by Normistral-7b-warm-instruct contain twice the
+We here present the analysis of our event-overlap
+number of events compared with the summaries
+metric on the test set of NorSumm. We first present
+generated by Llama-3-8B-instruct.
+the event-overlap between summaries and the orig-
+Instead of predicted events, we can also assess
+inal articles; we then present the event-overlap be-
+the influence of event detection accuracy and com-
+tween generated summaries and human-authored
+pare the gold event annotation of the original ar-
+summaries. Finally, we discuss the overall picture
+ticles to calculate the event-overlap scores. As
+summarizing event-overlap scores.
+Table 2 shows, the event-overlap scores are still
+relatively high, similar to using predicted events of
+4.1 Event-overlap between summaries and the
+the articles. The drops in scores are expected, be-
+original articles
+cause the event extraction model is not perfect and
+Table 1 shows the event-overlap between the sum-
+less frequent events are annotated, which would
+maries (both human-authored and generated) and
+normally not be included in the summary.
+the original articles. As the results show, both gen-
+With gold events, the ranking of the models turns
+erated summaries and human-authored summaries
+out to be different from when predicted events
+generally discuss events that are described in the
+are used; summaries generated by Meta-Llama-
+original articles, and there are always fewer events
+3-8B-Instruct have the highest event-overlap score
+in the summaries. As the Precision scores of eType-
+with the original articles, instead of Normistral-
+C are always above 90%, it is rare for events that
+11b-warm. However, the top-performing models
+are not discussed in the source article to be men-
+remain quite similar.
+tioned in the summary, which is especially true
+for generated summaries. The Recall scores of
+4.2 Event-overlap between summaries
+eType-C are much lower, meaning that there are
+Table 4 shows the event-overlap between model-
+far fewer events in the summaries; the number of
+generated summaries and human-authored sum-
+events varies considerably among generated sum-
+maries. As the event-overlap scores show, the pro-
+maries. The Precision scores of Role-C and Arg-C
+portion of shared events in generated summaries
+show that events are discussed with different levels
+with reference summaries varies across the vari-
+%https://huggingface.co/mistralai/
+ous models. In general, eType-C scores are much
+Mistral-Nemo-Instruct-2407
+higher than Role-C and Arg-C scores, indicat-
+%https://huggingface.co/noral1m/
+ing that the same events are discussed with dif-
+normistral-11b-warm
+ferent details. Table 5 presents an example of a
+https://huggingface.co/norallm/
+normistral-7b-warm-instruct
+TRANSFER-OWNERSHIP event described in a human-
+%https://huggingface.co/models
+authored summary and a model-generated sum-
+eType-C
+Role-C
+Arg-C
+Summary
+Event-overlap
+P
+R
+F1
+P
+R
+F1
+P
+R
+F1
+Human-authored
+90.7
+13.4
+23.4
+84.7
+13.2
+22.8
+68.2
+10.7
+18.4
+81.2
+Llama-3-8B-instruct
+93.3
+8.3
+15.3
+87.3
+6.8
+12.6
+70.4
+5.5
+10.2
+83.7
+(6)
+Llama-3-8B
+98.4
+12.1
+21.5
+89.2
+10.8
+19.3
+81.1
+9.9
+17.6
+89.6 (2)
+Meta-Llama-3-8B-Instruct
+97.8
+8.9
+16.3
+90.0
+7.9
+14.5
+76.3
+6.7
+12.3
+88.0
+(3)
+Mistral-Nemo-Instruct-2407
+98.0
+9.5
+17.3
+87.1
+8.1
+14.8
+69.4
+6.5
+11.8
+84.8 (4)
+Normistral-11b-warm
+96.7
+17.2
+29.2
+90.8
+16.2
+27.5
+82.2
+14.7
+24.9
+89.9
+(1)
+Normistral-7b-warm-instruct
+94.6
+17.2
+29.1
+88.5
+16.9
+28.3
+69.5
+13.3
+22.3
+84.2
+(5)
+Table 1: Event-overlap between summaries and the original articles, with event prediction is performed with
+NorEventGen. The subscripts indicate the corresponding ranking of the model based on the score.
+eType-C
+Role-C
+Arg-C
+Summary
+Event-overlap
+P
+R
+F1
+P
+R
+F1
+P
+R
+F1
+Human-authored
+74.2
+13.1
+22.4
+69.4
+11.9
+20.4
+59.2
+10.2
+17.4
+67.6
+Llama-3-8B-instruct
+84.4
+9.0
+16.2
+76.1
+6.5
+12.0
+66.2
+5.7
+10.5
+75.6
+(4)
+Llama-3-8B
+82.3
+12.1
+21.0
+76.6
+10.3
+18.1
+68.5
+9.2
+16.2
+75.8 (3)
+Meta-Llama-3-8B-Instruct
+87.0
+9.5
+17.1
+82.5
+8.0
+14.6
+75.0
+7.3
+13.3
+81.5
+(1)
+Mistral-Nemo-Instruct-2407
+83.7
+9.7
+17.4
+83.5
+8.6
+15.6
+74.1
+7.6
+13.8
+80.4 (2)
+Normistral-11b-warm
+80.0
+17.0
+28.1
+77.3
+15.3
+25.5
+69.3
+13.7
+22.9
+75.5 (5)
+Normistral-7b-warm-instruct
+87.0
+18.9
+31.1
+77.0
+16.2
+26.8
+59.8
+12.6
+20.8
+74.6 (6)
+Table 2: Event-overlap between summaries (predicted events) and the original articles (gold events). The subscripts
+indicate the corresponding ranking of the model based on the score.
+Summary
+#Events
+#Roles
+#Event types
+#Role types
+Annotator
+77
+156
+17
+23
+Annotator₂
+77
+146
+16
+20
+Annotator₃
+71
+126
+16
+24
+Llama-3-8B-instruct
+45
+71
+13
+17
+Llama-3-8B
+62
+111
+14
+19
+Meta-Llama-3-8B-Instruct
+46
+80
+14
+20
+Mistral-Nemo-Instruct-2407
+49
+85
+12
+19
+Normistral-11b-warm
+90
+163
+15
+20
+Normistral-7b-warm-instruct
+92
+174
+15
+23
+Gold events in original articles
+423
+826
+23
+25
+Predicted events in original articles
+506
+918
+23
+25
+Table 3: Event statistics of human-authored summaries by three different annotators and generated summaries by
+different models. Events are predicted with the selected event extraction system.
+eType-C
+Role-C
+Arg-C
+Model
+ROUGE-L
+BERTScore
+P
+R
+F1
+P
+R
+R
+Event-overlap
+F1
+P
+F1
+Llama-3-8B-instruct
+24.5 (6)
+72.1 (6)
+74.1
+44.6
+55.7
+58.2
+29.4
+39.0
+45.1
+22.9
+30.3
+32.3 (6)
+Llama-3-8B
+36.7 (3)
+73.3 (4)
+74.7
+61.9
+67.7
+61.3
+48.0
+53.7
+44.7
+35.0
+39.2
+48.3 (3)
+Meta-Llama-3-8B-Instruct
+28.8 (5)
+75.2 (2)
+75.4
+46.3
+57.3
+62.5
+35.3
+45.0
+52.9
+29.8
+38.1
+37.1 (4)
+Mistral-Nemo-Instruct-2407
+41.1 (1)
+75.8 (1)
+67.4
+43.9
+53.2
+55.7
+33.0
+41.4
+45.5
+27.0
+33.8
+34.6 (5)
+Normistral-11b-warm
+34.9 (4)
+73.1 (5)
+70.4
+84.6
+76.8
+55.6
+63.9
+59.4
+40.3
+46.1
+42.9
+64.9 (1)
+Normistral-7b-warm-instruct
+37.8 (2)
+73.7 (3)
+64.5
+79.2
+71.1
+51.0
+62.6
+56.1
+37.9
+46.5
+41.7
+62.8 (2)
+Table 4: Event-overlap between generated summaries and human-authored summaries. The subscripts indicate the
+corresponding ranking of the model based on the score.
+Tommy Sharif sikret seg "Diamanten", toppen av det historiske
+Human-authored
+Holmenkollen-tårnet, for nettauksjonen ble avsluttet kl 16.30 på søndag.
+Tommy Sharif secured the "Diamond", the top of the historic
+Holmenkollen Tower, before the online auction ended at 4:30 p.m. on Sunday.
+Tommy Sharif sikret seg vinnerbudet på «Diamanten»
+Generated
+på Holmenkollen-târnet da nettauksjonen ble avsluttet søndag.
+Tommy Sharif secured the winning bid for the "Diamond"
+on the Holmenkollen Tower when the online auction ended on Sunday.
+Table 5: Example sentence describing the same event, taken from a human-authored summary and a summary
+generated by Normistral-11b-warm.
+ARREST-JAIL, ATTACK, BE-BORN, CONVICT, DEMONSTRATE, DIE, ELECT, END-ORG
+Human-authored
+END-POSITION, INJURE, MEET, PHONE-WRITE, START-ORG, START-POSITION
+TRANSFER-MONEY, TRANSFER-OWNERSHIP, TRANSPORT, TRIAL-HEARING
+ARREST-JAIL, ATTACK, BE-BORN, CHARGE-INDICT, CONVICT, DEMONSTRATE, DIE, ELECT
+Generated
+END-ORG, END-POSITION, EXECUTE, FINE, INJURE, MEET, PHONE-WRITE, START-ORG
+START-POSITION, TRANSFER-MONEY, TRANSFER-OWNERSHIP TRANSPORT, TRIAL-HEARING
+Table 6: Event types in human-authored summaries and generated summaries.
+mary; the human annotator provides more detail
+tures the core content of the articles. These event-
+about the ARTIFACT, of which the ownership is
+overlap scores, as presented in Table 4 and 1, reveal
+transferred, and the TIME of the event, but the
+a notable trend: summaries generated by LLMs of-
+model stresses that the BUYER gets a winning bid in
+ten focus on different events within the article com-
+the auction.
+pared to those emphasized by human writers. This
+In terms of event types, there are much fewer
+pattern holds consistently across all the LLMs eval-
+event types in the summaries. The event ontology
+uated in the study. LLMs and human summarizers
+of EDEN defines 34 event types, but only half of
+tend to have different judgments on what consti-
+the event types exist in the reference summaries
+tutes the main events or key points in a news article,
+and even fewer in generated summaries. As such,
+showing that LLMs struggle to accurately identify
+only certain event types are often considered as
+and convey the main story in complex, real-world
+main event types, which are then described in the
+texts like news articles.
+summary. Table 6 lists all the event types that are
+described in all human-authored summaries and
+generated summaries, corresponding to 21 and 18
+5
+Conclusion
+event types.
+Compared to ROUGE-L and BERTScore, the
+standard summarization evaluation metrics, our
+In this article, we introduce a new approach for
+event-overlap scores result in slightly different
+evaluating abstractive summaries using event iden-
+rankings of model performances. According to
+tification information. Our proposed event-overlap
+ROUGE-L and BERTScore, the best-performing
+metric quantifies shared events between generated
+model is Mistral-Nemo-Instruct-2407, but our
+summaries, human-authored summaries, and the
+event-overlap metric would identify Normistral-
+original news articles, offering more insight into
+11b-warm as the best-performing model.
+the event information of the summaries. In conjunc-
+tion with standard summarization evaluation met-
+4.3 Event-overlap: a combined picture
+rics, our event-overlap metric adds a valuable di-
+By analyzing the event-overlap scores between
+mension to assessing the quality of LLM generated
+model-generated summaries and their correspond-
+summaries. Experiments conducted on NorSumm,
+ing human-authored counterparts, alongside the
+a richly annotated Norwegian dataset, demonstrate
+event-overlap scores between both types of sum-
+the effectiveness and practicality of our method.
+maries and the original articles, we can gain deeper
+Our approach is also easily adaptable to other
+insight into how each summarization approach cap-
+datasets and languages.
+Limitations
+(Volume 1: Long Papers), pages 4140-4170, Toronto,
+Canada. Association for Computational Linguistics.
+Our work has the following limitations: 1) we only
+experiment on a small Norwegian dataset, and the
+Sewon Min, Kalpesh Krishna, Xinxi Lyu, Mike Lewis,
+event annotation is on a sentence level, but a sum-
+Wen-tau Yih, Pang Koh, Mohit Iyyer, Luke Zettle-
+moyer, and Hannaneh Hajishirzi. 2023. FActScore:
+mary is a condensed version of the entire article;
+Fine-grained atomic evaluation of factual precision
+2) the selected set of generative LLMs is limited;
+in long form text generation. In Proceedings of the
+3) we make a considerable change to the perfect
+2023 Conference on Empirical Methods in Natural
+match of argument words in the original event ex-
+Language Processing, pages 12076-12100, Singa-
+pore. Association for Computational Linguistics.
+traction evaluation metric, and our new equivalent
+using BERTScore with a heuristic value of 0.7 as
+Minh Van Nguyen, Viet Dac Lai, and Thien Huu
+threshold, needs further experiments; 4) our event-
+Nguyen. 2021. Cross-task instance representation
+interactions and label dependencies for joint infor-
+overlap metric is limited by the event extraction
+mation extraction with graph convolutional networks.
+system used, and current event extraction systems
+In Proceedings of the 2021 Conference of the North
+are far from being perfect.
+American Chapter of the Association for Computa-
+tional Linguistics: Human Language Technologies,
+Acknowledgments
+pages 27-38, Online. Association for Computational
+Linguistics.
+This work was supported by industry partners and
+Samia Touileb, Vladislav Mikhailov, Marie Kroka,
+the Research Council of Norway with funding to
+Lilja Øvrelid, and Erik Velldal. 2025. Bench-
+MediaFutures: Research Centre for Responsible
+marking abstractive summarisation: A dataset of
+Media Technology and Innovation, through the cen-
+human-authored summaries of norwegian news
+ters for Research-based Innovation scheme, project
+articles. In Proceedings of the Joint 25th
+number 309339.
+Nordic Conference on Computational Linguistics
+and 11th Baltic Conference on Human Language
+Technologies(NoDaLiDa/Baltic-HLT 2025), pages
+729-738, Tallinn, Estonia.
+References
+Samia Touileb, Jeanett Murstad, Petter Mæhlum, Lu-
+George Doddington, Alexis Mitchell, Mark Przybocki,
+bos Steskal, Lilja Charlotte Storset, Huiling You, and
+Lance Ramshaw, Stephanie Strassel, and Ralph
+Lilja Øvrelid. 2024. EDEN: A dataset for event de-
+Weischedel. 2004. The automatic content extrac-
+tection in Norwegian news. In Proceedings of the
+tion (ACE) program - tasks, data, and evaluation. In
+2024 Joint International Conference on Computa-
+Proceedings of the Fourth International Conference
+tional Linguistics, Language Resources and Eval-
+on Language Resources and Evaluation (LREC'04),
+uation (LREC-COLING 2024), pages 5495-5506,
+Lisbon, Portugal. European Language Resources As-
+Torino, Italia. ELRA and ICCL.
+sociation (ELRA).
+Huiling You, Samia Touileb, Erik Velldal, and Lilja
+Wafaa S El-Kassas, Cherif R Salama, Ahmed A Rafea,
+Øvrelid. 2025. Noreventgen: generative event ex-
+and Hoda K Mohamed. 2021. Automatic text sum-
+traction from norwegian news. In Proceedings of the
+marization: A comprehensive survey. Expert systems
+Joint 25th Nordic Conference on Computational Lin-
+with applications, 165:113679.
+guistics and 11th Baltic Conference on Human Lan-
+Chin-Yew Lin. 2004. ROUGE: A package for auto-
+guage Technologies(NoDaLiDa/Baltic-HLT 2025),
+matic evaluation of summaries. In Text Summariza-
+pages 801-811, Tallinn, Estonia.
+tion Branches Out, pages 74-81, Barcelona, Spain.
+Shiyue Zhang and Mohit Bansal. 2021. Finding a bal-
+Association for Computational Linguistics.
+anced degree of automation for summary evaluation.
+Ying Lin, Heng Ji, Fei Huang, and Lingfei Wu. 2020.
+In Proceedings of the 2021 Conference on Empiri-
+A joint neural model for information extraction with
+cal Methods in Natural Language Processing, pages
+global features. In Proceedings of the 58th Annual
+6617-6632, Online and Punta Cana, Dominican Re-
+Meeting of the Association for Computational Lin-
+public. Association for Computational Linguistics.
+guistics, pages 7999-8009, Online. Association for
+Tianyi Zhang*, Varsha Kishore*, Felix Wu*, Kilian Q.
+Computational Linguistics.
+Weinberger, and Yoav Artzi. 2020. Bertscore: Eval-
+Yixin Liu, Alex Fabbri, Pengfei Liu, Yilun Zhao, Liny-
+uating text generation with bert. In International
+ong Nan, Ruilin Han, Simeng Han, Shafiq Joty,
+Conference on Learning Representations.
+Chien-Sheng Wu, Caiming Xiong, and Dragomir
+Radev. 2023. Revisiting the gold standard: Ground-
+A
+Summary statistics
+ing summarization evaluation with robust human
+evaluation. In Proceedings of the 61st Annual Meet-
+Writing summaries of news articles is a subjective
+ing of the Association for Computational Linguistics
+task. Human annotators can write different sum-
+Summary
+#Summ.
+#Tokens
+#Avg.
+Annotator]
+33
+8,679
+263
+Annotator₂
+33
+4,256
+129
+Annotator₃
+33
+2,732
+83
+Llama-3-8B-instruct
+33
+3,308
+100
+Llama-3-8B
+33
+4,331
+131
+Meta-Llama-3-8B-Instruct
+33
+3,523
+106
+Mistral-Nemo-Instruct-2407
+33
+3,019
+91
+Normistral-11b-warm
+33
+6,030
+182
+Normistral-7b-warm-instruct
+33
+5,653
+171
+Table 7: Statistics of human-authored summaries and generated summaries for the test set of NorSumm. "#Summ.":
+number of summaries; "#Tokens": total number of tokens; "#Avg.": average number of tokens per summary.
+maries for the same article. In NorSumm, each ar-
+ticle is accompanied with three unique summaries
+written different annotators, who write in very dif-
+ferent styles. As shown in Table 7, Annotator1 cre-
+ates the longest summaries, while Annotator₃ cre-
+ates the shortest summaries. The LLMs also gener-
+ate varied summaries. As shown in Table 7, some
+models generate rather short summaries, while
+some models generate rather long summaries.

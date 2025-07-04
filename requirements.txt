@@ -1,0 +1,4 @@
+boto3
+requests
+google-genai
+beautifulsoup4

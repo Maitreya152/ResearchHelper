@@ -1,0 +1,14 @@
+{
+    "2507.01019": {
+        "title": "MALIBU Benchmark: Multi-Agent LLM Implicit Bias Uncovered",
+        "local_pdf_path": "data\\raw\\pdfs_20250703_232013\\2507.01019.pdf",
+        "arxiv_link": "https://arxiv.org/abs/2507.01019",
+        "s3_pdf_path": "raw/pdfs_20250703_232013\\2507.01019.pdf"
+    },
+    "2507.01160": {
+        "title": "Event-based evaluation of abstractive news summarization",
+        "local_pdf_path": "data\\raw\\pdfs_20250703_232013\\2507.01160.pdf",
+        "arxiv_link": "https://arxiv.org/abs/2507.01160",
+        "s3_pdf_path": "raw/pdfs_20250703_232013\\2507.01160.pdf"
+    }
+}

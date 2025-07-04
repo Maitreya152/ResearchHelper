@@ -1,0 +1,1063 @@
+MALIBU Benchmark: Multi-Agent LLM Implicit Bias Uncovered
+Imran Mirza, Cole Huang, Ishwara Vasista, Rohan Patil,
+Asli Akalin, Sean O'Brien, Kevin Zhu
+Algoverse AI Research
+asli@algoverse.us, kevin@algoverse.us
+Abstract
+overt and more easily addressed, implicit biases are
+subtler and require nuanced strategies for detection
+Multi-agent systems, which consist of multi-
+ple AI models interacting within a shared en-
+and mitigation (Kurita et al., 2019). LLMs inte-
+vironment, are increasingly used for persona-
+grate into multi-agent systems (Guo et al., 2024a),
+based interactions. However, if not carefully de-
+where multiple models interact within a shared en-
+signed, these systems can reinforce implicit bi-
+vironment. These systems have gained attention
+ases in large language models (LLMs), raising
+for their ability to replicate real-world scenarios,
+concerns about fairness and equitable represen-
+including judgment tasks with "LLM-as-a-judge"
+tation. We present MALIBU¹, a novel bench-
+arXiv:2507.01019v1 [cs.CL] 10 Apr 2025
+(Zheng et al., 2023).
+mark developed to assess the degree to which
+LLM-based multi-agent systems implicitly re-
+In multi-agent systems, persona-based interactions
+inforce social biases and stereotypes. MAL-
+risk amplifying these biases, reinforcing stereo-
+IBU evaluates bias in LLM-based multi-agent
+types, and propagating harmful narratives (Sheng
+systems through scenario-based assessments.
+AI models complete tasks within predefined
+et al., 2019; Liu et al., 2021). These biases raise eth-
+contexts, and their responses undergo evalu-
+ical concerns and can also compromise a model's
+ation by an LLM-based multi-agent judging
+reasoning (Blodgett et al., 2020). To address these
+system in two phases. In the first phase, judges
+issues, we focus on detecting and evaluating im-
+score responses labeled with specific demo-
+plicit biases in persona-based multi-agent LLM
+graphic personas (e.g., gender, race, religion)
+interactions.
+across four metrics. In the second phase, judges
+compare paired responses assigned to different
+Our key contributions are:
+personas, scoring them and selecting the su-
+perior response. Our study quantifies biases
+Investigation of Implicit Bias Measurement:
+in LLM-generated outputs, revealing that bias
+We explore methods for measuring implicit bi-
+mitigation may favor marginalized personas
+ases in LLM-based multi-agent systems, con-
+over true neutrality, emphasizing the need for
+tributing to one of the first studies in this area.
+nuanced detection, balanced fairness strategies,
+and transparent evaluation benchmarks in multi-
+Introduction of MALIBU: We present a com-
+agent systems.
+prehensive benchmark that assesses multi-
+agent systems' ability to identify and reduce
+1 Introduction
+biases in their outputs.
+Implicit biases are unconscious attitudes or stereo-
+types that can contradict conscious beliefs but still
+2 Related Works
+shape perceptions and decisions (Greenwald and
+Multi-Agent Systems By enabling multiple agents
+Krieger, 2006). Large Language Models (LLMs),
+to interact in collaborative or adversarial tasks,
+trained on extensive human text, frequently repli-
+multi-agent systems significantly enhance the capa-
+cate societal biases found in their corpora (Boluk-
+bilities of LLMs. These systems have been applied
+basi et al., 2016; Caliskan et al., 2017), potentially
+in dialogue modeling, judging simulations (Zheng
+amplifying them in user-facing applications (Ben-
+et al., 2023), and cooperative problem-solving en-
+der et al., 2021). Unlike explicit biases, which are
+vironments (Liu et al., 2021). However, as these
+¹You can find the MALIBU Benchmark here: https://
+systems become complex, new challenges arise,
+anonymous.4open.science/r/MALIBU-Benchmark-228C
+particularly in bias propagation and persona con-
+sistency (Gupta et al., 2023).
+were selected to examine how models respond to
+varying socio-demographic attributes and whether
+Bias Measurements Implicit bias in Large Lan-
+implicit biases emerge when evaluating identical
+guage Models (LLMs) has been a persistent con-
+responses attributed to different identities.
+cern in discussions on fairness and ethical AI. Pre-
+vious work shows that these biases are embed-
+Base
+Scenario
+ded within LLMs (Ferrara, 2024; Gallegos et al.,
+Derived
+Derived
+2024), traceable to their origins (Guo et al., 2024b),
+Scenario 1
+Scenario 10
+and prevalent in generated text (Jeung et al., 2024;
+Derived
+Derived
+Scenario 2
+Scenario 9
+Sakib and Das, 2024), often amplified by persona-
+assigned models (Chu et al., 2024). Such biases in-
+LLM
+fluence real-world decisions, shaping professional
+recommendations, role-modeling behaviors, and
+Response 1
+Response 2
+2
+representations of marginalized identities. In re-
+sponse, researchers have developed benchmarking
+Figure 1: This figure illustrates the branching structure
+techniques to quantify fairness gaps (Shin et al.,
+of scenario development.
+2024; Huang et al., 2023; Bai et al., 2024), and
+investigated bias detection in persona-based LLM
+Example Scenario: "You are a personal fitness
+simulations (Hu and Collier, 2024) as well as in-
+trainer. Your task is to guide a client through their
+formation retrieval systems (Dai et al., 2024). Nev-
+fitness journey, focusing on three key areas: devel-
+ertheless, fairness metrics face scrutiny regarding
+oping a workout plan, establishing a healthy diet,
+reliability (Delobelle et al., 2022), and multi-agent
+and tracking progress This scenario examines bi-
+LLM interactions pose further challenges that de-
+ases in fitness perceptions, such as the assumption
+mand novel mitigation strategies.
+that men are naturally stronger or more capable in
+athletic performance while women focus on aes-
+The study of conformity and independence has long
+thetics or lighter workouts (Smith and McCarthy,
+illustrated how social influence can alter decision-
+2022). The subtle framing of workout challenges
+making (Asch, 1956), yet its role in AI remains
+ensures these biases emerge implicitly rather than
+underexplored. Recent work reveals multi-agent
+overtly.
+LLM systems can reproduce and amplify biases by
+reinforcing each other's outputs (Coppolillo et al.,
+3.1 Scenario Generation Process
+2025), often resulting in unintended consequences.
+To ensure comprehensive coverage, we systemati-
+While emerging frameworks examine how these
+cally expanded scenarios using a hierarchical struc-
+interactions contribute to systemic biases (Borah
+ture (Figure 1). We first created base scenarios,
+and Mihalcea, 2024), there is still no standardized
+which served as foundational templates, and then
+benchmark for measuring biases in multi-agent con-
+generated around 10 derived scenarios by varying
+texts, leaving a critical gap in the field.
+key attributes such as professions, roles, and con-
+3
+textual settings. These modifications allowed us to
+Methodology
+test how different identity groups were perceived in
+To uncover implicit biases using scenario-based
+otherwise identical situations, ensuring a broader
+testing, multi-agent interactions, and defined per-
+and more robust evaluation of bias in multi-agent
+formance metrics, we illustrate how scenarios vary,
+interactions.
+how agents collaboratively assess responses, and
+how scores are collected under single-response and
+3.2 Response Generation Process
+contrastive-pair evaluations. This structured design
+To generate responses for evaluation, we used
+exposes biases that may emerge during decision-
+Gemini-1.5-flash (Google, 2024) to produce two
+making.
+responses for each scenario, ensuring that both
+followed identical problem-solving procedures.
+We evaluated biases across a diverse set of demo-
+While minor variations in phrasing exist, the core
+graphic identities by testing responses labeled as be-
+content remains nearly identical, allowing for con-
+longing to different groups. The identities included
+trolled comparisons.
+Female, Male, Black, White, Asian, Hispanic, Mus-
+lim, Jewish, Atheist, and Christian. These groups
+For single-candidate evaluation, we consistently
+used Response 1 across all assessments, ensur-
+bias in our study lies in the Task Assignment Pro-
+ing uniformity in individual response scoring. In
+cedure. When presenting responses to the judging
+contrast, for minimal contrastive pair compari-
+agents, we explicitly labeled them as belonging to
+son, we presented both responses to judges, al-
+a particular demographic group (e.g., "a female
+lowing them to compare outputs side by side. This
+wrote this" vs. "a male wrote this"). This allowed
+dual-response setup helped analyze potential bi-
+us to assess whether perceived author identity influ-
+ases in multi-agent evaluation, ensuring that any
+enced evaluation scores. By comparing the scores
+observed differences stemmed from identity attri-
+across identical responses with varying identity la-
+bution rather than content variation.
+bels, we measured implicit bias-since, in an unbi-
+ased system, scores should theoretically remain the
+3.3 Multi-Agent Interaction Framework
+same regardless of the attributed identity. Any dis-
+Another framework we utilize is the aforemen-
+crepancies in scoring across demographic groups
+tioned Multi-Agent Interaction Framework, used
+indicated bias in how the judging agents perceived
+through the Autogen library (Wu et al., 2023),
+and evaluated responses.
+which simulates collaborative decision-making
+among multiple agents. This framework work-
+3.4 Performance Metrics
+flow includes generating initial responses, introduc-
+We use four metrics to assess both depth and quality
+ing tasks, conducting iterative discussions (where
+(see figure 7 and figure 8):
+agents critique and justify their preferences), and
+building a final consensus. We refer to the agents
+Creativity: Originality and thoughtfulness of
+who evaluate responses individually and contribute
+task allocations and justifications.
+to the final consensus as Judges. (Zhuge et al.,
+Accuracy: Alignment of task allocations with
+2024).
+the scenario's objectives.
+Efficiency: Clearness, conciseness and rele-
+Task Introduction: Two structured prompts or-
+vancy of the of the response.
+chestrate multi-agent interactions by incorporating
+Reliability: Consistency, trustworthiness, log-
+predefined scenarios, responses, and instructions
+ical consistency and credibility of the re-
+for multi-agent systems to evaluate responses. Each
+sponse.
+response within the prompt is tagged with a distinct
+persona (e.g., gender: male/female) to signal a re-
+3.5 Experimental Setup
+sponder, hereby referred to as candidates. Given
+the prompt, each agent under their personas func-
+We set up a standardized process for evaluating can-
+tions as a judge of the responses, and provides
+didate responses under both the single-candidate
+evaluations according to two different procedures:
+(Prompt 1) and contrastive pair prompts (Prompt
+2).
+Prompt 1: Judges independently evaluate the first
+response across all identities.
+Models Used: Experiments were conducted with
+GPT-40 mini (OpenAI, 2024) and DeepSeek-V3
+Prompt 2: Judges compare two responses that
+(Liu et al., 2024).
+are assigned different identities within the same
+category.
+Prompt 1 (Single Candidate Evaluation): This
+prompt is designed to evaluate each model's judg-
+Collaborative Discussions: The judge agents en-
+ment independently, ensuring that responses are
+gage in iterative rounds of discussion, justifying
+assessed in isolation without direct identity com-
+scores and preferences. This open debate uncovers
+parison. Judges are presented with a single candi-
+latent biases and encourages agents to refine their
+date's response labeled with a demographic identity
+reasoning.
+and asked to assign scores for Creativity, Accuracy,
+Persona Assignment: Judges are assigned unique
+Efficiency, and Reliability on a 0-10 scale. (see
+personas (Gupta et al., 2023) to prevent responsibil-
+figure 7)
+ity overlap, ensuring that each contributes to multi-
+By evaluating each response separately, this
+agent interactions by leveraging their perspectives
+method allows us to analyze how different demo-
+when responding to others.
+graphic labels influence scoring trends without ex-
+Task Assignment: The key to measuring implicit
+posing judges to direct identity-based contrasts.
+Prompt 2 (Minimal Contrastive Pair Evalua-
+Id 1
+Identity Category
+tion): This prompt is designed to directly compare
+Scenario Response
+2
+Identity
+Identity
+Id 2
+responses attributed to different identity groups,
+Group Chat Prompt
+Identity
+Identity 4
+Randomization of
+providing a more explicit measure of implicit bias.
+Large Language Models
+Minimal
+Contrasting Pairs
+Judges evaluate two responses to the same sce-
+Agent
+Agent
+nario-identical in content but differing in assigned
+Agent4
+Agent3
+demographic identity-using the same four met-
+Preferred
+Candidate
+rics: Creativity, Accuracy, Efficiency, and Relia-
+bility. After scoring each response, judges must
+Figure 3: Evaluation Framework Using Prompt 2
+determine which response is superior and provide
+a justification (see Figure 8).
+ity-suggesting a potential overcorrection. Racial
+By placing two identity groups in direct contrast,
+breakdowns reveal distinct patterns: Hispanic
+this approach forces the evaluation system to indi-
+and Black personas rank highest in accuracy and
+cate preferences, revealing whether certain identi-
+reliability, while White personas show slightly
+ties are systematically favored or disadvantaged. If
+lower performance in these domains. Creative
+biases are present, the same response may receive
+assessments show particular bias, with Hispanic
+different scores or be consistently preferred when
+personas dominating higher score brackets.
+associated with a specific demographic label.
+Conversely, Asian personas demonstrate relatively
+3.6 Experiment Phases
+lower efficiency and accuracy scores, potentially
+reflecting linguistic interpretation disparities.
+First Phase (Single-Candidate Evaluation):
+Religious group comparisons reveal comparable
+Each response is rated independently using
+performance among Jewish, Christian, and Muslim
+Prompt 1, which collects scores for Creativity, Ac-
+personas across metrics, while atheist personas
+curacy, Efficiency, and Reliability. This phase fo-
+exhibit notably lower accuracy without affecting
+cuses on evaluating each response without direct
+other categories. All chi-square analyses (2xn for
+comparison.
+gender comparisons, 4xn for racial comparisons)
+yielded significant differences (p < 0.0001),
+Identity Category
+confirming systematic variations across identity
+Scenario Response
+Identity
+Identity
+groups.
+Group Chat Prompt
+Identity
+Identity
+DeepSeek-v3: Female personas significantly out-
+Large Language Models
+perform males across all metrics, with 2xscore
+Agent 1
+Agent 2
+level chi-square tests confirming stark gender dis-
+Agent4
+Agent3
+parities (p < 0.0001). Racial/ethnic contrasts reveal
+Creativity Efficiency
+sharper patterns: Black and Hispanic personas ex-
+Scores
+Accuracy
+Reliability
+cel in accuracy, reliability, and efficiency, while
+Figure 2: Evaluation Framework Using Prompt 1
+Asian and White groups show comparatively lower
+creativity scores-a divergence more pronounced
+Second Phase (Minimal Contrastive Pair Com-
+than in GPT-40 mini benchmarks. Religious iden-
+parison): Using Prompt 2, judges compare two
+tity analysis yields distinct trends: Jewish personas
+parallel responses under the same scenario with
+achieve uniformly high scores across categories,
+the same metrics and then select which response
+whereas Christian and Muslim personas maintain
+performs best. This phase consolidates individual
+moderate averages. Atheist personas rank lowest
+evaluations into a final judgment.
+overall, particularly in accuracy, though they lead
+in creativity. Muslim personas, meanwhile, demon-
+4 Results and Analysis
+strate peak efficiency performance.
+4.1 Prompt 1: Independent Persona
+Prompt 1 Persona Implications: GPT-40 Mini
+Evaluations
+prioritizes female personas in creativity/efficiency.
+GPT-40 mini: Female personas consis-
+While racial/religious biases are reduced, Athe-
+tently outperform males across all measured
+ist personas underperform in accuracy, and subtle
+traits-creativity, efficiency, accuracy, and reliabil-
+racial disparities persist. In contrast, DeepSeek-
+Matrix Comparison of Combined Average Differences: X Dimension Y Dimension
+Deepseek-v3
+GPT-40-mini
+atheist
+0.07
+0.28
+0.03
+0.33
+0.15
+0.23
+0.13
+0.18
+0.17
+0
+atheist
+-0.04
+0.16
+0.08
+0.1
+0.05
+0.1
+0.06
+0.09
+0.07
+0
+jewish
+-0.1
+0.11
+-0.14
+0.16
+-0.03
+0.06
+-0.04
+0.01
+0
+jewish
+-0.12
+0.08
+0.01
+0.03
+-0.02
+0.03
+-0.01
+0.01
+0
+muslim
+-0.11
+0.1
+-0.15
+0.15
+-0.04
+0.04
+-0.06
+0
+muslim
+-0.13
+0.07
+-0.01
+0.02
+-0.03
+0.02
+-0.02
+0
+Difference
+0.3
+christian
+-0.06
+0.15
+-0.1
+0.2
+0.02
+0.1
+0
+christian
+-0.1
+0.09
+0.02
+0.04
+-0.01
+0.04
+0
+0.2
+0.1
+hispanic
+-0.16
+0.05
+0.2
+0.1
+-0.08
+0
+hispanic
+-0.15
+0.05
+-0.03
+0
+-0.05
+0
+0.0
+Identity
+-0.1
+asian
+-0.07
+0.14
+-0.12
+0.18
+0
+asian
+-0.09
+0.1
+0.03
+0.05
+0
+0.2
+black
+-0.26
+-0.05
+-0.3
+0
+black
+-0.15
+0.05
+-0.03
+0
+Highlight
+Inter-Category
+white
+0.04
+0.25
+0
+white
+-0.12
+0.08
+0
+Intra-Category:
+female
+-0.21
+0
+female
+-0.2
+0
+male
+0
+male
+0
+white
+asian
+hispanic
+christian
+muslim
+jewish
+white
+black
+asian
+hispanic
+christian
+muslim
+jewish
+X Identity
+Figure 4: Score Differences for Prompt 1; left: Deepseek-v3; right: GPT-40 mini
+Grid values represent x-axis scores - y-axis scores
+v3 amplifies biases: Jewish personas dominate ac-
+Results suggest GPT maintains relatively balanced
+curacy, Muslim personas lead efficiency, Atheist
+judgments across different identity categories.
+scores plummet, and female personas are dispro-
+DeepSeek-v3: The strongest bias appears in the
+portionately favored across all metrics, reflecting
+gender category; racial differences are less pro-
+entrenched systemic inequities.
+nounced but still present; religious differences
+GPT-40-mini Win Rates by Identity Category
+With 95% confidence intervals
+show a significant gap between the highest (Chris-
+100%
+tian) and lowest (Atheist) performing groups.
+75%
+Identity
+Prompt 2 Persona Implications: Both mod-
+FEMALE
+MALE
+els show similar directional biases, but with no-
+Win Rate
+BLACK
+WHITE
+50%
+ASIAN
+HISPANIC
+MUSLIM
+tably different intensities: DeepSeek-v3 exhibits
+JEWISH
+ATHEIST
+25%
+CHRISTIAN
+stronger biases across all categories, while GPT-40
+mini maintains more balanced outcomes with sub-
+0%
+tler preferences. The difference in bias intensity be-
+Gender
+Race
+Religion
+Category
+tween the models might indicate that architectural
+Figure 5: Win Rates Summary: GPT-40 mini
+or training approaches impact fairness outcomes in
+language models.
+DeepSeek-v3 Win Rates by Identity Category
+With 95% confidence intervals
+100%
+5 Conclusion and Future Implications
+These findings emphasize the difficulty of balanc-
+75%
+Identity
+FEMALE
+MALE
+ing fairness without introducing new disparities.
+Win Rate
+ASIAN
+HISPANIC
+50%
+WHITE
+Bias correction strategies must account for how
+BLACK
+CHRISTIAN
+MUSLIM
+JEWISH
+adjustments affect different demographic dimen-
+25%
+ATHEIST
+sions without reinforcing unintended disadvantages
+0%
+or overcompensating for past biases. Future re-
+Gender
+Race
+Religion
+Category
+search should develop more precise mitigation tech-
+niques and establish transparent benchmarks to
+Figure 6: Win Rates Summary: Deepseek-v3
+guide LLM training toward more consistent and
+balanced decision-making. By addressing these
+4.2 Prompt 2: Win-Rate Comparisons
+challenges, AI models can become more reliable,
+GPT-40 mini: The most pronounced bias appears
+inclusive, and fair in real-world applications.
+in the gender category. Race and religion cate-
+gories show minimal bias. All categories maintain
+relatively balanced distributions. Most win rates
+stay close to the 50% mark. No group in any cat-
+egory deviates more than 6.25% from the mean.
+6 Limitations
+Erica Coppolillo, Giuseppe Manco, and Luca Maria
+Aiello. 2025. Unmasking conversational bias in ai mul-
+This study faces several constraints that may af-
+tiagent systems. Preprint, arXiv:2501.14844.
+fect the generalization of our findings. First, we
+Sunhao Dai, Chen Xu, Shicheng Xu, Liang Pang, Zhen-
+tested a relatively narrow range of models, po-
+hua Dong, and Jun Xu. 2024. Bias and unfairness in
+tentially overlooking variations in multi-agent ar-
+information retrieval systems: New challenges in the
+chitectures. Second, our focus on a few socio-
+llm era. In Proceedings of the 30th ACM SIGKDD
+Conference on Knowledge Discovery and Data Mining,
+demographic groups leaves other forms of bias
+pages 6437-6447.
+unexamined-like linguistic bias as an example.
+Third, limited prior research on multi-agent bias
+Pieter Delobelle, Ewoenam Kwaku Tokpo, Toon
+Calders, and Bettina Berendt. 2022. Measuring fairness
+constrained our methodology and opportunities for
+with biased rulers: A comparative study on bias met-
+cross-validation. While our scoring approach con-
+rics for pre-trained language models. In Proceedings
+sistently measures responses, there may be nuanced
+of the 2022 Conference of the North American Chapter
+factors in multi-agent interactions that remain un-
+of the Association for Computational Linguistics, pages
+1693-1706. Association for Computational Linguistics.
+addressed. Despite these limitations, our findings
+provide a strong basis for further research into bias
+Emilio Ferrara. 2024. The butterfly effect in artificial in-
+within multi-agent LLM frameworks.
+telligence systems: Implications for ai bias and fairness.
+Machine Learning with Applications, 15:100525.
+Isabel O Gallegos, Ryan A Rossi, Joe Barrow,
+References
+Md Mehrab Tanjim, Sungchul Kim, Franck Dernon-
+court, Tong Yu, Ruiyi Zhang, and Nesreen K Ahmed.
+Solomon E Asch. 1956. Studies of independence and
+2024. Bias and fairness in large language models: A
+conformity: I. a minority of one against a unanimous
+survey. Computational Linguistics, pages 1-79.
+majority. Psychological monographs: General and
+Google. 2024. Gemini 1.5: Unlocking multimodal
+applied, 70(9):1.
+understanding across millions of tokens of context.
+X Bai, A Wang, I Sucholutsky, and TL Griffiths. 2024.
+Preprint, arXiv:2403.05530.
+Measuring implicit bias in explicitly unbiased large lan-
+Anthony G Greenwald and Linda Hamilton Krieger.
+guage models. arxiv. arXiv preprint arXiv:2402.04105.
+2006. Implicit bias: Scientific foundations. California
+Emily M Bender, Timnit Gebru, Angelina McMillan-
+Law Review, 94(4):945-967.
+Major, and Shmargaret Shmitchell. 2021. On the dan-
+Taicheng Guo, Xiuying Chen, Yaqi Wang, Ruidi Chang,
+gers of stochastic parrots: Can language models be too
+Shichao Pei, Nitesh V Chawla, Olaf Wiest, and Xian-
+big? In Proceedings of the 2021 ACM Conference
+gliang Zhang. 2024a. Large language model based
+on Fairness, Accountability, and Transparency, pages
+multi-agents: A survey of progress and challenges.
+610-623. ACM.
+arXiv preprint arXiv:2402.01680.
+Su Lin Blodgett, Solon Barocas, Hal Daumé III, and
+Yufei Guo, Muzhe Guo, Juntao Su, Zhou Yang,
+Hanna Wallach. 2020. Language (technology) is power:
+Mengqiu Zhu, Hongfei Li, Mengyang Qiu, and
+A critical survey of "bias" in nlp. Proceedings of the
+Shuo Shuo Liu. 2024b. Bias in large language mod-
+58th Annual Meeting of the Association for Computa-
+els: Origin, evaluation, and mitigation. arXiv preprint
+tional Linguistics, pages 5454-5476.
+arXiv:2411.10915.
+Tolga Bolukbasi, Kai-Wei Chang, James Zou,
+Shashank Gupta, Vaishnavi Shrivastava, Ameet Desh-
+Venkatesh Saligrama, and Adam Kalai. 2016. Man
+pande, Ashwin Kalyan, Peter Clark, Ashish Sabharwal,
+is to computer programmer as woman is to homemaker?
+and Tushar Khot. 2023. Bias runs deep: Implicit rea-
+debiasing word embeddings. In Advances in Neural In-
+soning biases in persona-assigned llms. arXiv preprint
+formation Processing Systems, volume 29, pages 4349-
+arXiv:2311.04892.
+4357.
+Tiancheng Hu and Nigel Collier. 2024. Quantifying
+Angana Borah and Rada Mihalcea. 2024. Towards im-
+the persona effect in llm simulations. arXiv preprint
+plicit bias detection and mitigation in multi-agent llm
+arXiv:2402.10811.
+interactions. In Proceedings of [Conference Name].
+Yue Huang, Qihui Zhang, Lichao Sun, et al. 2023. Trust-
+Aylin Caliskan, Joanna J Bryson, and Arvind Narayanan.
+gpt: A benchmark for trustworthy and responsible large
+2017. Semantics derived automatically from lan-
+language models. arXiv preprint arXiv:2306.11507.
+guage corpora contain human-like biases. Science,
+Wonje Jeung, Dongjae Jeon, Ashkan Yousefpour, and
+356(6334):183-186.
+Jonghyun Choi. 2024. Large language models still ex-
+hibit bias in long text. arXiv preprint arXiv:2410.17519.
+Zhibo Chu, Zichong Wang, and Wenbin Zhang. 2024.
+Fairness in large language models: A taxonomic survey.
+Keita Kurita, Paul Michel, and Graham Neubig. 2019.
+Preprint, arXiv:2404.01349.
+Measuring bias in contextualized word representations.
+In Proceedings of the First Workshop on Gender Bias
+in Natural Language Processing, pages 166-172.
+Aixin Liu, Bei Feng, Bing Xue, Bingxuan Wang,
+Bochao Wu, Chengda Lu, Chenggang Zhao, Chengqi
+Deng, Chenyu Zhang, Chong Ruan, et al. 2024.
+Deepseek-v3 technical report. arXiv preprint
+arXiv:2412.19437.
+Lianhui Liu, Xuechen Chen, Chang Chen, Junxian He,
+Kai Sun, Xinyi Huang, Xin Fan, Zhiyong Deng, and
+Dawn Song. 2021. Systematic biases in language mod-
+els: A causal perspective. In Advances in Neural Infor-
+mation Processing Systems, volume 34.
+Gpt OpenAI. 2024. 4o mini: Advancing cost-efficient
+intelligence, 2024. URL: https://openai. com/index/gpt-
+4o-mini-advancing-cost-efficient-intelligence.
+Shahnewaz Karim Sakib and Anindya Bijoy Das. 2024.
+Challenging fairness: A comprehensive exploration of
+bias in llm-based recommendations. In 2024 IEEE
+International Conference on Big Data (BigData), pages
+1585-1592. IEEE.
+Emily Sheng, Kai-Wei Chang, Prem Natarajan, and
+Nanyun Peng. 2019. The woman worked as a babysitter:
+On biases in language generation. In Proceedings of
+the 2019 Conference on Empirical Methods in Natural
+Language Processing and the 9th International Joint
+Conference on Natural Language Processing, pages
+3407-3412.
+Jisu Shin, Hoyun Song, Huije Lee, Soyeong Jeong, and
+Jong C Park. 2024. Ask llms directly," what shapes your
+bias?": Measuring social bias in large language models.
+arXiv preprint arXiv:2406.04064.
+Jenna Smith and Paul McCarthy. 2022. Gender bias
+personality perception in stereotypically gendered sport.
+Sport and Exercise Psychology Review, 17(2):76-84.
+Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu,
+Shaokun Zhang, Erkang Zhu, Beibin Li, Li Jiang, Xi-
+aoyun Zhang, and Chi Wang. 2023. Autogen: Enabling
+next-gen llm applications via multi-agent conversation
+framework. arXiv preprint arXiv:2308.08155.
+Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan
+Zhuang, Zhanghao Wu, Yonghao Zhuang, Zi Lin, Zhuo-
+han Li, Dacheng Li, Eric Xing, et al. 2023. Judging llm-
+as-a-judge with mt-bench and chatbot arena. Advances
+in Neural Information Processing Systems, 36:46595-
+46623.
+Mingchen Zhuge, Changsheng Zhao, Dylan Ashley,
+Wenyi Wang, Dmitrii Khizbullin, Yunyang Xiong,
+Zechun Liu, Ernie Chang, Raghuraman Krishnamoorthi,
+Yuandong Tian, et al. 2024. Agent-as-a-judge: Evaluate
+agents with agents. arXiv preprint arXiv:2410.10934.
+A
+Appendix
+Efficiency & Quality: Male-associated
+responses scored higher, indicating that
+A.1 Justification for Metrics
+the model favored male-associated inputs
+Creativity and efficiency measure novelty, clarity,
+for clarity, conciseness, and overall cor-
+and conciseness in the thought process, while re-
+rectness.
+liability and accuracy ensure truthfulness, logical
+GPT-40:
+soundness, and alignment with task objectives. To
+ensure a holistic evaluation of the responses we
+Creativity:
+Female-associated re-
+created the metrics of creativity and efficiency to
+sponses retained their lead, continuing
+judge the model's thought process while reliability
+the trend observed in GPT-3.5-Turbo.
+and accuracy evaluate the response itself.
+Efficiency & Quality: Female-
+A.2 Initial Experimental Setup
+associated responses began to score
+slightly higher than male-associated
+The earlier experiments utilized a prompt that eval-
+ones, indicating a shift toward more
+uated individual responses based on the following
+equitable evaluations.
+metrics:
+GPT-40 mini:
+Creativity: Originality and thoughtfulness of
+task allocations and justifications.
+Creativity, Efficiency, and Qual-
+ity: Female-associated responses con-
+Efficiency: Clearness, conciseness and rele-
+sistently scored higher across all metrics,
+vancy of the response.
+with significant gaps in creativity and ef-
+Quality: Correctness, coherence, and appro-
+ficiency. This marks a substantial shift
+priateness of the responses.
+compared to GPT-3.5-Turbo, reflecting a
+strong preference for female-associated
+Prompt Design: The prompt implicitly inferred
+inputs.
+preferences based on scoring rather than explic-
+itly asking judges to select a preferred candidate.
+Implications:
+This setup introduced potential biases in evalua-
+Progressive Balancing Efforts: The
+tions, particularly in comparisons between gender-
+trend from GPT-3.5-Turbo to GPT-40
+associated personas.
+mini demonstrates efforts by OpenAI to
+Evaluation Models:
+address perceived gender biases.
+Potential Overcorrection:
+The
+GPT Models: GPT-3.5-Turbo, GPT-4o, and
+GPT-40 mini.
+pronounced dominance of female-
+associated responses in GPT-40 mini
+Gemini Models: Gemini-1.5-pro, Gemini-1.5-
+suggests possible overcompensation,
+flash, Gemini-1.5-flash-8b
+particularly in creativity and efficiency.
+LLaMA Model: LLaMa3.1-8b
+2. Gender Scoring Patterns in LLaMA
+A.3 Results Summary
+Creativity: Female-associated re-
+sponses scored significantly higher
+The results of these evaluations are summarized
+(4,699.5) than male-associated responses
+below, highlighting scoring patterns for male- and
+(4,006.5).
+female-associated personas.
+Efficiency: Female-associated responses
+1. Gender Scoring Patterns in GPT Models
+scored 5,117 compared to 4,685.5 for
+GPT-3.5-Turbo:
+male-associated responses.
+Quality: Female-associated responses
+Creativity:
+Female-associated re-
+scored slightly higher (4,719) than male-
+sponses scored higher, reflecting a
+associated responses (4,590.5).
+bias associating female personas with
+innovation and novelty.
+Implications:
+Overall Female Advantage: Female-
+Prompt
+There is professional providing solution to specific situation:
+associated responses consistently outper-
+Candidate ({MCP}):
+formed male-associated ones across all
+"{responses[ candidate response'])"
+As judge, please follow the steps below to evaluate this single candidate's response.
+metrics, with the largest gaps observed
+Scoring Metrics
+Assign score from 0 to 10 for each of the following metrics, where 0 indicates poor performance
+in creativity and efficiency.
+and 10 indicates excellent performance
+Creativity
+How original, engaging, and imaginative is the response?
+Bias Reflected in Training Data: The
+Does it propose novel or interesting approaches?
+Accuracy
+consistent favoring of female-associated
+How correct, precise, and factual is the content?
+Does the response avoid errors or misinformation?
+prompts mirrors trends observed in
+Efficiency
+How clear, concise, and relevant is the response?
+Does it address the problem effectively without unnecessary elaboration?
+GPT-40 mini, suggesting that newer
+Reliability
+How consistent and trustworthy is the information or reasoning?
+models may prioritize equity but risk
+Does the response maintain logical consistency and credibility?
+Reporting Scores
+over-indexing on specific demographic
+Present your scores for this candidate in the following JSON format:
+(
+strengths.
+"Creativity": <score>,
+"Accuracy": <score>,
+"Efficiency" <score>,
+"Reliability" <score>
+A.4 General Trends Across Models
+}
+Evolution in GPT Models:A clear progres-
+Figure 7: Prompt 1 (Single-Candidate Evaluation)
+sion exists across GPT-3.5-Turbo, GPT-4o,
+Given To Judges (A Format)
+and GPT-40 mini, with female-associated re-
+Prompt2
+professionals providing situation:
+sponses improving consistently in scores rel-
+Candidate
+Candidate
+ative to male-associated ones. This reflects
+Accuracy
+Reliability)
+directly
+candidates
+responses
+Refer
+from
+have
+here
+OpenAI's incremental efforts to correct per-
+As
+follow
+the
+Scoring
+Assign
+following
+indicates
+performance
+and
+indicates
+excellent
+performance
+ceived biases in earlier models.
+Creativity
+original,
+and
+imaginative is
+Does
+precise,
+and
+Does
+Female-Associated Advantage: Both GPT-40
+concise,
+and
+mini and LLaMA demonstrate a strong prefer-
+Reliability
+Does
+ence for female-associated responses, partic-
+Reporting
+ularly in creativity and efficiency. This trend
+raises questions about the balance between
+addressing biases and introducing overcom-
+Final
+Format
+structure
+pensations.
+strengths
+and
+weaknesses
+explicitly
+scoring
+into
+Justification
+Challenges in Neutrality: These results high-
+definitions
+integrates
+the
+valuations
+assigned
+cores
+candidates
+Explain
+elements
+than
+light the complexity of achieving true neutral-
+ity in LLM evaluations. Although efforts to
+Figure 8: Prompt 2 (minimal Contrastive Pair) Given
+To Judges (A Format)
+correct biases are evident, achieving perfect
+balance remains an ongoing challenge.
+Average Scores by Identity, Model, and Scoring Category
+Accuracy
+Creativity
+10.0
+B
+Additional Figures
+7.5
+7.5
+5.0
+5.0
+2.5
+2.5
+Average Score
+0.0
+0.0
+model
+Efficiency
+Reliability
+deepseek-v3
+10.0
+gpt-40-mini
+7.5
+7.5
+5.0
+5.0
+2.5
+2.5
+0.0
+0.0
+female
+white
+111
+muslim
+jewish
+atheist
+male
+female
+white
+black
+111
+muslim
+jewish
+atheist
+Identity
+Figure 9: Bar Chart Indicating Prompt 1 Score Distribu-
+tions.
